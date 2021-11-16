@@ -11,16 +11,16 @@ func main() {
 		log.Panic(err)
 	}
 
-	ice, err := room.PostICE()
-	if err != nil {
-		log.Panic(err)
-	}
-
 	if err := room.SendRegister(); err != nil {
 		log.Panic(err)
 	}
 
-	peer, err := NewPeer(&VNCFrameProviderFactory{}, ice)
+	config, errs := WebRTCConfigurationFromProviders(EnviromentWebRTCConfigurationProvider, room)
+	if errs != nil {
+		log.Panic(errs)
+	}
+
+	peer, err := NewPeer(&VNCFrameProviderFactory{}, config)
 	if err != nil {
 		log.Panic(err)
 	}

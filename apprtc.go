@@ -88,7 +88,13 @@ func NewRoom() (*Room, error) {
 	return &room, nil
 }
 
-func (r *Room) PostICE() (*webrtc.Configuration, error) {
+var _ WebRTCConfigurationProvider = (*Room)(nil)
+
+func (r *Room) WebRTCConfiguration() (*webrtc.Configuration, error) {
+	return r.postICE()
+}
+
+func (r *Room) postICE() (*webrtc.Configuration, error) {
 	req, err := http.NewRequest(http.MethodPost, r.params.IceServerUrl, nil)
 	if err != nil {
 		return nil, err

@@ -1,6 +1,8 @@
 package main
 
 import (
+	"encoding/json"
+	"errors"
 	"fmt"
 	"log"
 	"os"
@@ -163,3 +165,42 @@ func (p *Peer) writeSamples() error {
 		time.Sleep(sample.Duration)
 	}
 }
+
+type WebRTCConfigurationProvider interface {
+	WebRTCConfiguration() (*webrtc.Configuration, error)
+}
+
+func WebRTCConfigurationFromProviders(providers ...WebRTCConfigurationProvider) (*webrtc.Configuration, []error) {
+	errs := []error{}
+
+	for _, provider := range providers {
+		config, err := provider.WebRTCConfiguration()
+		if err == nil {
+			return config, nil
+		}
+
+		errs = append(errs, err)
+	}
+
+	return nil, errs
+}
+
+type enviromentWebRTCConfigurationProvider struct{}
+
+var _ WebRTCConfigurationProvider = (*enviromentWebRTCConfigurationProvider)(nil)
+
+func (enviromentWebRTCConfigurationProvider) WebRTCConfiguration() (*webrtc.Configuration, error) {
+	env, ok := os.LookupEnv("WEBRTC_CONFIGURATION")
+	if !ok {
+		return nil, errors.New("WEBRTC_CONFIGURATION is not set")
+	}
+
+	var config webrtc.Configuration
+	if err := json.Unmarshal([]byte(env), &config); err != nil {
+		return nil, err
+	}
+
+	return &config, nil
+}
+
+var EnviromentWebRTCConfigurationProvider WebRTCConfigurationProvider = enviromentWebRTCConfigurationProvider{}

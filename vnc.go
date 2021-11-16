@@ -210,7 +210,7 @@ type VNCFrameProvider struct {
 	client *VNCClient
 }
 
-var _ FrameProvider = &VNCFrameProvider{}
+var _ FrameProvider = (*VNCFrameProvider)(nil)
 
 func NewVNCFrameProvider(addr string) (*VNCFrameProvider, error) {
 	client, err := NewVNCClient(addr)
@@ -238,7 +238,7 @@ type VNCFrameProviderFactory struct {
 	Addr string
 }
 
-var _ FrameProviderFactory = &VNCFrameProviderFactory{}
+var _ FrameProviderFactory = (*VNCFrameProviderFactory)(nil)
 
 func (f *VNCFrameProviderFactory) NewFrameProvider() (FrameProvider, error) {
 	return NewVNCFrameProvider(f.Addr)
